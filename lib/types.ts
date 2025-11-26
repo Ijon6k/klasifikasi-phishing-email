@@ -1,3 +1,4 @@
+// --- Existing Types (Rule Based) ---
 export interface AnalysisDetail {
   val: number;
   label: string;
@@ -5,16 +6,27 @@ export interface AnalysisDetail {
 }
 
 export interface AnalysisDetails {
-  sbw: AnalysisDetail; // Subject/Body Warning
-  urlip: AnalysisDetail; // URL is IP
-  urld: AnalysisDetail; // URL Domain Dots
-  urls: AnalysisDetail; // URL Suspicious Symbols
+  sbw: AnalysisDetail;
+  urlip: AnalysisDetail;
+  urld: AnalysisDetail;
+  urls: AnalysisDetail;
 }
 
-export interface AnalysisResult {
+export interface RuleBasedResult {
+  type: "rule";
   score: number;
   status: "PHISHING" | "SUSPICIOUS" | "LEGIT";
   message: string;
   detectedUrl: string | null;
   details: AnalysisDetails;
 }
+
+// --- New Type (API Model) ---
+export interface ApiResult {
+  type: "api";
+  prediction: string; // "PHISHING" or "LEGIT" (from JSON)
+  confidence: number; // 0 - 100 (from JSON)
+}
+
+// Union Type
+export type DetectionResult = RuleBasedResult | ApiResult;

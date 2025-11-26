@@ -1,4 +1,4 @@
-import { AnalysisResult } from "./types";
+import { AnalysisResult } from "@/lib/types";
 // --- Knowledge Base ---
 const blacklistKeywords = [
   "urgent",
