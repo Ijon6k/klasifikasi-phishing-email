@@ -1,5 +1,5 @@
-import { AnalysisResult } from "@/lib/types";
-// --- Knowledge Base ---
+import { RuleBasedResult } from "@/lib/types";
+
 const blacklistKeywords = [
   "urgent",
   "verify",
@@ -12,22 +12,18 @@ const blacklistKeywords = [
 
 const suspiciousSymbols = ["%", "@", "?", "=", "-", "_"];
 
-// --- Helper: URL Extractor ---
 export const extractUrl = (text: string): string | null => {
   const urlRegex = /(https?:\/\/[^\s]+)|(www\.[^\s]+)/g;
   const matches = text.match(urlRegex);
   return matches ? matches[0] : null;
 };
 
-// --- Logic Core (Forward Chaining) ---
-export const analyzePhishing = (text: string): AnalysisResult => {
-  // 1. Content Analysis (SBW) - Weight 0.4
+export const analyzePhishing = (text: string): RuleBasedResult => {
   const sbwMatch = blacklistKeywords.some((keyword) =>
     text.toLowerCase().includes(keyword)
   );
   const sbw = sbwMatch ? 1 : 0;
 
-  // Init URL factors
   let urlip = 0;
   let urld = 0;
   let urls = 0;
@@ -35,11 +31,9 @@ export const analyzePhishing = (text: string): AnalysisResult => {
   const detectedUrl = extractUrl(text);
 
   if (detectedUrl) {
-    // 2. URL IP Check (URLIP) - Weight 0.3
     const ipRegex = /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/;
     urlip = ipRegex.test(detectedUrl) ? 1 : 0;
 
-    // 3. Domain Dots Check (URLD) - Weight 0.2
     try {
       let hostname = detectedUrl;
       if (!detectedUrl.startsWith("http")) {
@@ -49,21 +43,18 @@ export const analyzePhishing = (text: string): AnalysisResult => {
       const domain = urlObj.hostname;
       const dotCount = (domain.match(/\./g) || []).length;
       urld = dotCount >= 3 ? 1 : 0;
-    } catch (err) {
-      // Fallback regex count
+    } catch (error: unknown) {
+      console.error("URL parsing error:", error);
       urld = (detectedUrl.match(/\./g) || []).length >= 3 ? 1 : 0;
     }
 
-    // 4. Suspicious Symbols (URLS) - Weight 0.2
     urls = suspiciousSymbols.some((s) => detectedUrl.includes(s)) ? 1 : 0;
   }
 
-  // 5. Calculate Score
   const scoreRaw = sbw * 0.4 + urlip * 0.3 + urld * 0.2 + urls * 0.2;
   const score = parseFloat(scoreRaw.toFixed(2));
 
-  // 6. Decision Rules
-  let status: AnalysisResult["status"] = "LEGIT";
+  let status: RuleBasedResult["status"] = "LEGIT";
   let message = "Konten terlihat aman.";
 
   if (score >= 0.7) {
@@ -75,6 +66,7 @@ export const analyzePhishing = (text: string): AnalysisResult => {
   }
 
   return {
+    type: "rule",
     score,
     status,
     message,

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Settings2, Globe, Server, Cpu } from "lucide-react";
+import { Shield, Settings2, Globe, Cpu } from "lucide-react";
 import { analyzePhishing } from "@/lib/analyzer";
-import { DetectionResult, RuleBasedResult } from "@/lib/types";
+import { DetectionResult } from "@/lib/types";
 import ResultCard from "@/components/ResultCard";
 
 export default function Home() {
@@ -71,13 +71,17 @@ export default function Home() {
           confidence: data.confidence,
           prediction: data.prediction,
         });
-      } catch (error: any) {
-        console.error("API Error:", error);
-        alert(
-          `Error: ${error.message}. Pastikan URL Ngrok benar & server aktif.`
-        );
-      } finally {
-        setIsAnimating(false);
+      } catch (error: unknown) {
+        let message = "Terjadi kesalahan tak dikenal.";
+
+        if (error instanceof Error) {
+          console.error("API Error:", error);
+          message = error.message;
+        } else {
+          console.error("API Error:", error);
+        }
+
+        alert(`Error: ${message}. Pastikan URL Ngrok benar & server aktif.`);
       }
     }
 

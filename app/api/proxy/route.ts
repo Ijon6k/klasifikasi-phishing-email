@@ -29,10 +29,16 @@ export async function POST(request: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error: any) {
-    console.error("Proxy Error:", error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Proxy Error:", error);
+      return NextResponse.json(
+        { error: error.message || "Gagal menghubungi API via Proxy" },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
-      { error: error.message || "Gagal menghubungi API via Proxy" },
+      { error: "Unknown error occurred" },
       { status: 500 }
     );
   }

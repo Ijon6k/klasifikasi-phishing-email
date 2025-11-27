@@ -24,9 +24,9 @@ export interface RuleBasedResult {
 // --- New Type (API Model) ---
 export interface ApiResult {
   type: "api";
-  prediction: string; // "PHISHING" or "LEGIT" (from JSON)
-  confidence: number; // 0 - 100 (from JSON)
+  prediction: "PHISHING" | "LEGIT"; // hasil dari server AI
+  confidence: number; // 0 - 100
 }
 
-// Union Type
+// --- Union Type ---
 export type DetectionResult = RuleBasedResult | ApiResult;
